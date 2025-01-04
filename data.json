@@ -1,0 +1,52 @@
+{
+  "messages": [
+    {
+      "id": 1735997435836,
+      "user": "bandi",
+      "text": "hiiii",
+      "type": "question"
+    },
+    {
+      "id": 1735997456081,
+      "user": "ak",
+      "text": "// Start server\napp.listen(PORT, () => {\n  console.log(`Server running on http://localhost:${PORT}`);\n});\n",
+      "type": "question"
+    },
+    {
+      "id": 1735997797158,
+      "text": "Request failed with status code 400\nAxiosError: Request failed with status code 400\n    at settle (http://localhost:3001/static/js/bundle.js:28641:12)\n    at XMLHttpRequest.onloadend (http://localhost:3001/static/js/bundle.js:27288:66)\n    at Axios.request (http://localhost:3001/static/js/bundle.js:27787:41)\n    at async handleSubmit (http://localhost:3001/main.2b921f670c6f3eb0b029.hot-update.js:53:22)"
+    },
+    {
+      "id": 1735997823481,
+      "text": "# app.py\nfrom flask import Flask, render_template, request, jsonify, session\nimport json\nfrom datetime import datetime\nimport time\n\napp = Flask(__name__)\napp.secret_key = 'your_secret_key_here'  # Required for session management\n\n# Store notes and active users\nNOTES_FILE = 'notes.json'\nactive_users = {}\n\n#func to remove users if they are not using the site anymore\ndef cleanup_inactive_users():\n    current_time = time.time()\n    # Remove users inactive for more than 30 seconds\n    inactive = [uid for uid, data in active_users.items() \n               if current_time - data['last_active'] > 30]\n    for uid in inactive:\n        del active_users[uid]\n\ndef load_notes():\n    try:\n        with open(NOTES_FILE, 'r') as f:\n            return json.load(f)\n    except FileNotFoundError:\n        return []\n\ndef save_notes(notes):\n    with open(NOTES_FILE, 'w') as f:\n        json.dump(notes, f)\n\n@app.route('/')\ndef home():\n    if 'user_id' not in session:\n        session['user_id'] = f'user_{len(active_users) + 1}'\n    \n    user_id = session['user_id']\n    ip_address = request.remote_addr\n    active_users[user_id] = {\n        'ip': ip_address,\n        'last_active': time.time()\n    }\n    return render_template('index.html', user_id=user_id)\n\n@app.route('/api/notes', methods=['GET'])\ndef get_notes():\n    if 'user_id' in session:\n        active_users[session['user_id']]['last_active'] = time.time()\n    cleanup_inactive_users()\n    notes = load_notes()\n    return jsonify(notes)\n\n@app.route('/api/notes', methods=['POST'])\ndef add_note():\n    if 'user_id' not in session:\n        return jsonify({'error': 'No session'}), 401\n    \n    active_users[session['user_id']]['last_active'] = time.time()\n    data = request.get_json()\n    content = data.get('content')\n    if content:\n        notes = load_notes()\n        note = {\n            'id': len(notes) + 1,\n            'content': content,\n            'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),\n            'user_id': session['user_id'],\n            'ip': request.remote_addr\n        }\n        notes.append(note)\n        save_notes(notes)\n        return jsonify(note), 201\n    return jsonify({'error': 'Content is required'}), 400\n\n@app.route('/api/active-users', methods=['GET'])\ndef get_active_users():\n    cleanup_inactive_users()\n    return jsonify(list(active_users.items()))\n\nif __name__ == '__main__':\n    app.run(host='0.0.0.0', port=5000, debug=True)\n\n# templates/index.html\n"
+    },
+    {
+      "id": 1735998419335,
+      "text": "hi"
+    },
+    {
+      "id": 1735998556579,
+      "text": "hi\n"
+    },
+    {
+      "id": 1735998564837,
+      "text": "bye"
+    },
+    {
+      "id": 1735998569514,
+      "text": "hhhh"
+    },
+    {
+      "id": 1735998575273,
+      "text": "const express = require('express');\nconst bodyParser = require('body-parser');\nconst cors = require('cors');\nconst fs = require('fs');\n\nconst app = express();\nconst PORT = 5000;\nconst DATA_FILE = 'data.json';\n\n// Middleware\napp.use(cors());\napp.use(bodyParser.json());\n\n// Initialize data file\nif (!fs.existsSync(DATA_FILE)) {\n  fs.writeFileSync(DATA_FILE, JSON.stringify({ messages: [] }, null, 2));\n}\n\n// Get all messages\napp.get('/messages', (req, res) => {\n  const data = JSON.parse(fs.readFileSync(DATA_FILE));\n  res.json(data.messages);\n});\n\n// Add a new message\napp.post('/messages', (req, res) => {\n  const { text } = req.body; // Only text is required now\n  if (!text) {\n    return res.status(400).json({ error: 'Text is required' });\n  }\n\n  const data = JSON.parse(fs.readFileSync(DATA_FILE));\n  const newMessage = { id: Date.now(), text };\n  data.messages.push(newMessage);\n  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));\n  res.status(201).json(newMessage);\n});\n\n// Start server\napp.listen(PORT, () => {\n  console.log(`Server running on http://localhost:${PORT}`);\n});\n"
+    },
+    {
+      "id": 1735998610964,
+      "text": "h"
+    },
+    {
+      "id": 1735998644810,
+      "text": "Hi"
+    }
+  ]
+}
